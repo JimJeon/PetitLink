@@ -10,8 +10,8 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
-class MagicURL(Base):
-    __tablename__ = 'magicurl'
+class ShortUrl(Base):
+    __tablename__ = 'shorturl'
 
     id = Column(Integer, primary_key=True)
     original_url = Column(String)
