@@ -29,7 +29,7 @@ async def index():
 
 @app.get('/short/{url_id}')
 async def retrieve(url_id: int, db: Session = Depends(get_db)):
-    return db.query(ShortUrl).filter(ShortUrl.id == url_id).first()
+    return db.query(ShortUrl).filter(ShortUrl.id == url_id).first()  # type: ignore
 
 
 @app.post('/short')
