@@ -22,6 +22,11 @@ class CreateUrlDto(BaseModel):
     short_url: str
 
 
+class UpdateUrlDto(BaseModel):
+    original_url: str
+    short_url: str
+
+
 @app.get('/index')
 async def index():
     return 'hello world'
@@ -40,11 +45,18 @@ async def create(dto: CreateUrlDto, db: Session = Depends(get_db)):
     db.refresh(new_url)
 
 
-@app.patch('/short')
-async def update():
-    ...
+@app.patch('/short/{url_id}')
+async def update(url_id: int, dto: UpdateUrlDto, db: Session = Depends(get_db)):
+    url = db.query(ShortUrl).filter(ShortUrl.id == url_id).first()  # type: ignore
+    # TODO: optional fields
+    url.original_url = dto.original_url
+    url.short_url = dto.short_url
+    db.commit()
+    db.refresh(url)
 
 
-@app.delete('/short')
-async def delete():
-    ...
+@app.delete('/short/{url_id}')
+async def delete(url_id: int, db: Session = Depends(get_db)):
+    url = db.query(ShortUrl).filter(ShortUrl.id == url_id).first()  # type: ignore
+    db.delete(url)
+    db.commit()
