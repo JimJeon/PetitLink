@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
-from db import SessionLocal, ShortUrl
+from db import SessionLocal, PetitLink
 
 
 app = FastAPI()
@@ -17,14 +17,14 @@ def get_db():
         db.close()
 
 
-class CreateUrlDto(BaseModel):
-    original_url: str
-    short_url: str
+class CreateLinkDto(BaseModel):
+    original_link: str
+    short_link: str
 
 
-class UpdateUrlDto(BaseModel):
-    original_url: str
-    short_url: str
+class UpdateLinkDto(BaseModel):
+    original_link: str
+    short_link: str
 
 
 @app.get('/index')
@@ -32,31 +32,31 @@ async def index():
     return 'hello world'
 
 
-@app.get('/short/{url_id}')
-async def retrieve(url_id: int, db: Session = Depends(get_db)):
-    return db.query(ShortUrl).filter(ShortUrl.id == url_id).first()  # type: ignore
+@app.get('/short/{link_id}')
+async def retrieve(link_id: int, db: Session = Depends(get_db)):
+    return db.query(PetitLink).filter(PetitLink.id == link_id).first()  # type: ignore
 
 
 @app.post('/short')
-async def create(dto: CreateUrlDto, db: Session = Depends(get_db)):
-    new_url = ShortUrl(original_url=dto.original_url, short_url=dto.short_url)
-    db.add(new_url)
+async def create(dto: CreateLinkDto, db: Session = Depends(get_db)):
+    new_link = PetitLink(original_link=dto.original_link, short_link=dto.short_link)
+    db.add(new_link)
     db.commit()
-    db.refresh(new_url)
+    db.refresh(new_link)
 
 
-@app.patch('/short/{url_id}')
-async def update(url_id: int, dto: UpdateUrlDto, db: Session = Depends(get_db)):
-    url = db.query(ShortUrl).filter(ShortUrl.id == url_id).first()  # type: ignore
+@app.patch('/short/{link_id}')
+async def update(link_id: int, dto: UpdateLinkDto, db: Session = Depends(get_db)):
+    link = db.query(PetitLink).filter(PetitLink.id == link_id).first()  # type: ignore
     # TODO: optional fields
-    url.original_url = dto.original_url
-    url.short_url = dto.short_url
+    link.original_link = dto.original_link
+    link.short_link = dto.short_link
     db.commit()
-    db.refresh(url)
+    db.refresh(link)
 
 
-@app.delete('/short/{url_id}')
-async def delete(url_id: int, db: Session = Depends(get_db)):
-    url = db.query(ShortUrl).filter(ShortUrl.id == url_id).first()  # type: ignore
-    db.delete(url)
+@app.delete('/short/{link_id}')
+async def delete(link_id: int, db: Session = Depends(get_db)):
+    link = db.query(PetitLink).filter(PetitLink.id == link_id).first()  # type: ignore
+    db.delete(link)
     db.commit()

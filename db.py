@@ -14,12 +14,12 @@ def init_db():
     Base.metadata.create_all(bind=engine)
 
 
-class ShortUrl(Base):
-    __tablename__ = 'shorturl'
+class PetitLink(Base):
+    __tablename__ = 'petit_link'
 
     id = Column(Integer, primary_key=True)
-    original_url = Column(String)
-    short_url = Column(String)
+    original_link = Column(String)
+    petit_link = Column(String)
     created_at = Column(DateTime)
 
 
