@@ -1,6 +1,7 @@
 import pytest
 
 from main import send_login_email, AuthSettings
+from email.mime.multipart import MIMEMultipart
 
 
 class TestSendLoginEmail:
@@ -16,9 +17,10 @@ class TestSendLoginEmail:
         # Arrange
         mock_smtp = mocker.MagicMock(name='main.smtplib.SMTP')
         mocker.patch('main.smtplib.SMTP', new=mock_smtp)
+        msg = MIMEMultipart()
 
         # Act
-        await send_login_email('to@test.com')
+        await send_login_email('to@test.com', msg)
 
         # Assert
         mock_smtp.return_value.__enter__.return_value.starttls.assert_called_once()
@@ -27,6 +29,6 @@ class TestSendLoginEmail:
 
         mock_smtp.assert_called_with('smtp.gmail.com', 587)
         mock_smtp.return_value.__enter__.return_value.login.assert_called_with('from@test.com', 'auth-email-password')
-        # mock_smtp.return_value.__enter__.return_value.sendmail.assert_called_with('from@test.com', 'to@test.com')
+        mock_smtp.return_value.__enter__.return_value.sendmail.assert_called_with('from@test.com', 'to@test.com', msg.as_string())
 
 
