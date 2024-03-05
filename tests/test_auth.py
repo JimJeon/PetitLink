@@ -1,8 +1,9 @@
 import pytest
 
-from main import send_login_email, build_email_message, AuthSettings
 from email.mime.multipart import MIMEMultipart
 
+from petitlink import AuthSettings
+from petitlink.routes.auth import send_login_email, build_email_message
 
 class TestBuildEmailMessage:
     @pytest.mark.parametrize(
@@ -33,8 +34,8 @@ class TestSendLoginEmail:
     )
     async def test_send_login_email(self, mocker, patch_settings: AuthSettings):
         # Arrange
-        mock_smtp = mocker.MagicMock(name='main.smtplib.SMTP')
-        mocker.patch('main.smtplib.SMTP', new=mock_smtp)
+        mock_smtp = mocker.MagicMock(name='petitlink.routes.auth.smtplib.SMTP')
+        mocker.patch('petitlink.routes.auth.smtplib.SMTP', new=mock_smtp)
         msg = MIMEMultipart()
 
         # Act

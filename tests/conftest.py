@@ -4,7 +4,7 @@ from collections.abc import Iterator
 from pytest import FixtureRequest
 from pydantic_core import PydanticUndefinedType
 
-from main import settings, AuthSettings
+from petitlink import AuthSettings, settings
 
 
 # Patching pydantic settings for pytest
