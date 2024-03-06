@@ -12,5 +12,8 @@ class Settings(BaseSettings):
 
 
 router = APIRouter()
-templates = Jinja2Templates(directory='templates')
+templates = Jinja2Templates(directory='templates/')
 settings = Settings()
+
+
+from . import routes
