@@ -1,7 +1,6 @@
 from fastapi import FastAPI
-from fastapi.templating import Jinja2Templates
 
-from petitlink.routes import api, auth
+from petitlink import api, auth
 
 
 def create_app():
@@ -13,4 +12,3 @@ def create_app():
     return app
 
 
-templates = Jinja2Templates(directory='petitlink/templates')

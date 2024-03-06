@@ -10,11 +10,8 @@ from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import RedirectResponse
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
-from petitlink import templates
+from petitlink.auth import router, templates
 from petitlink.settings import auth_settings
-
-
-router = APIRouter()
 
 
 class LoginForm:

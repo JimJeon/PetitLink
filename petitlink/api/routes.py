@@ -1,11 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from petitlink.db import SessionLocal, PetitLink
-
-
-router = APIRouter()
+from petitlink.api import router
+from petitlink.api.models import SessionLocal, PetitLink
 
 
 # Dependency
