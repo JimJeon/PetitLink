@@ -1,14 +1,16 @@
+from fastapi import FastAPI
 from fastapi.templating import Jinja2Templates
-from pydantic_settings import BaseSettings
+
+from petitlink.routes import api, auth
 
 
-class AuthSettings(BaseSettings):
-    auth_email: str
-    auth_email_password: str
-    auth_secret_key: str
-    auth_salt: str
-    auth_access_token_secret_key: str
+def create_app():
+    app = FastAPI()
+
+    app.include_router(api.router)
+    app.include_router(auth.router)
+
+    return app
 
 
-settings = AuthSettings()
 templates = Jinja2Templates(directory='petitlink/templates')

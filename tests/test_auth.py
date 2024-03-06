@@ -2,8 +2,9 @@ import pytest
 
 from email.mime.multipart import MIMEMultipart
 
-from petitlink import AuthSettings
+from petitlink.settings import AuthSettings
 from petitlink.routes.auth import send_login_email, build_email_message
+
 
 class TestBuildEmailMessage:
     @pytest.mark.parametrize(

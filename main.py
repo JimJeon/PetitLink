@@ -7,13 +7,10 @@ from fastapi.responses import RedirectResponse
 from redis.exceptions import WatchError
 
 from petitlink.db import redis_client
-from petitlink.routes import auth, api
+from petitlink import create_app
 
 
-app = FastAPI()
-
-app.include_router(auth.router)
-app.include_router(api.router)
+app = create_app()
 
 
 @app.get('/index')
