@@ -1,5 +1,3 @@
-import redis
-
 from sqlalchemy import create_engine, Column, String, Integer, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -14,9 +12,6 @@ Base = declarative_base()
 
 def init_db():
     Base.metadata.create_all(bind=engine)
-
-
-redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
 
 class PetitLink(Base):
