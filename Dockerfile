@@ -1,10 +1,10 @@
 FROM python:3.12
-WORKDIR /app
+WORKDIR /petitlink/
 RUN pip install poetry
 
-# COPY ./ /app
+# COPY ./ /petitlink/
 COPY pyproject.toml poetry.lock /petitlink/
-VOLUME ["/petitlink"]
+VOLUME ["/petitlink/"]
 
 RUN poetry install --no-root
 EXPOSE 8000
