@@ -106,6 +106,19 @@ def generate_access_token(email: str):
         payload,
         settings.auth_access_token_secret_key,
         algorithm='HS256'
-    ).encode('utf-8')
+    )
 
     return token
+
+
+def decode_access_token(token: str):
+    try:
+        payload = jwt.decode(token, settings.auth_access_token_secret_key, algorithms='HS256')
+    except jwt.exceptions.InvalidSignatureError:
+        return HTTPException(status_code=401, detail='Invalid token')
+    except jwt.ExpiredSignatureError:
+        return HTTPException(status_code=401, detail='Token expired')
+    except Exception as e:
+        return HTTPException(status_code=500, detail=f'Error: {e}')
+
+    return payload['email']
