@@ -6,12 +6,11 @@ from typing import List
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import Request, HTTPException
 from fastapi.responses import RedirectResponse
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
-from petitlink.auth import router, templates
-from petitlink.settings import auth_settings
+from petitlink.auth import router, templates, settings
 
 
 class LoginForm:
@@ -59,12 +58,12 @@ def build_email_message(to: str) -> MIMEMultipart:
 
     # Add a message header
     msg['Subject'] = 'PetitLink Login'
-    msg['From'] = auth_settings.auth_email
+    msg['From'] = settings.auth_email
     msg['To'] = to
 
     # Create a link with serialized email
-    serializer = URLSafeTimedSerializer(auth_settings.auth_secret_key)
-    link = serializer.dumps(to, salt=auth_settings.auth_salt)
+    serializer = URLSafeTimedSerializer(settings.auth_secret_key)
+    link = serializer.dumps(to, salt=settings.auth_salt)
     link = 'http://local.petitlink.com:8000/verify/' + link
 
     # Add a message body
@@ -78,16 +77,16 @@ def build_email_message(to: str) -> MIMEMultipart:
 async def send_login_email(to: str, msg: MIMEMultipart) -> None:
     with smtplib.SMTP('smtp.gmail.com', 587) as server:
         server.starttls()  # TLS support for security
-        server.login(auth_settings.auth_email, auth_settings.auth_email_password)
-        server.sendmail(auth_settings.auth_email, to, msg.as_string())
+        server.login(settings.auth_email, settings.auth_email_password)
+        server.sendmail(settings.auth_email, to, msg.as_string())
         print('email sent successfully')
 
 
 @router.get('/verify/{token}')
 async def verify(token: str, expiration: int = 600):
-    serializer = URLSafeTimedSerializer(auth_settings.auth_secret_key)
+    serializer = URLSafeTimedSerializer(settings.auth_secret_key)
     try:
-        email = serializer.loads(token, salt=auth_settings.auth_salt, max_age=expiration)
+        email = serializer.loads(token, salt=settings.auth_salt, max_age=expiration)
         token = generate_access_token(email)
         response = RedirectResponse('/index')
         response.set_cookie(
@@ -105,7 +104,7 @@ def generate_access_token(email: str):
 
     token = jwt.encode(
         payload,
-        auth_settings.auth_access_token_secret_key,
+        settings.auth_access_token_secret_key,
         algorithm='HS256'
     ).encode('utf-8')
 
