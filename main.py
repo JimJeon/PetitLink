@@ -1,4 +1,5 @@
 from fastapi import Request
+from fastapi.exceptions import HTTPException
 from fastapi.templating import Jinja2Templates
 
 from petitlink import create_app
@@ -11,10 +12,16 @@ app = create_app()
 
 @app.get('/index')
 async def index(request: Request):
+
     token = request.cookies.get('token')
 
-    if token is None:
+    if not token:
         return templates.TemplateResponse('index.html', {'request': request})
 
-    email = decode_access_token(token)
+    try:
+        email = decode_access_token(token)
+    except HTTPException as e:
+        print(e)
+        return templates.TemplateResponse('index.html', {'request': request})
+
     return templates.TemplateResponse('index.html', {'request': request, 'user_email': email})
