@@ -8,7 +8,7 @@ from pydantic_core import PydanticUndefinedType
 from pydantic_settings import BaseSettings
 
 from petitlink.auth import Settings, settings
-from petitlink.auth.routes import send_login_email, build_email_message
+from petitlink.auth.core import send_login_email, build_email_message
 
 
 # Patching pydantic settings for pytest
@@ -76,8 +76,8 @@ class TestSendLoginEmail:
     )
     async def test_send_login_email(self, mocker, patch_settings: Settings):
         # Arrange
-        mock_smtp = mocker.MagicMock(name='petitlink.auth.routes.smtplib.SMTP')
-        mocker.patch('petitlink.auth.routes.smtplib.SMTP', new=mock_smtp)
+        mock_smtp = mocker.MagicMock(name='petitlink.auth.core.smtplib.SMTP')
+        mocker.patch('petitlink.auth.core.smtplib.SMTP', new=mock_smtp)
         msg = MIMEMultipart()
 
         # Act
