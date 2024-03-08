@@ -122,3 +122,11 @@ def decode_access_token(token: str):
         return HTTPException(status_code=500, detail=f'Error: {e}')
 
     return payload['email']
+
+
+@router.get('/logout')
+def logout(request: Request) -> None:
+    msg = 'Logout Successful'
+    response = templates.TemplateResponse('auth/login.html', {'request': request, 'msg': msg})
+    response.delete_cookie(key='token', domain='petitlink.com')
+    return response
