@@ -27,12 +27,12 @@ class LoginForm:
 
 
 @router.get('/login')
-def login(request: Request):
+async def login_get_view(request: Request):
     return templates.TemplateResponse("auth/login.html", {"request": request})
 
 
 @router.post('/login')
-async def login(request: Request):
+async def login_post_view(request: Request):
     form = LoginForm(request)
     await form.load_data()
     if await form.is_valid():
