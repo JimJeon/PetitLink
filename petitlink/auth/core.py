@@ -5,10 +5,14 @@ from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from fastapi import HTTPException
+from argon2 import PasswordHasher
+from argon2.exceptions import VerificationError, HashingError
+from fastapi import HTTPException, Depends
 from itsdangerous import URLSafeTimedSerializer
+from sqlalchemy.orm import Session
 
 from petitlink.auth import settings
+from petitlink.auth.models import UserTable
 
 
 def build_email_message(to: str) -> MIMEMultipart:
@@ -66,3 +70,35 @@ def decode_access_token(token: str) -> str:
         raise HTTPException(status_code=500, detail=f'Error: {e}')
 
     return payload['email']
+
+
+def register(db: Session, email: str, password: str):
+    hashed = hash_password(password)
+    new_user = UserTable(email=email, password_hash=hashed)
+
+    db.add(new_user)
+    db.commit()
+
+
+def hash_password(password: str):
+    ph = PasswordHasher()
+    try:
+        _hash = ph.hash(password)
+    except HashingError:
+        return ''
+    except Exception as e:
+        print(e)
+        return ''
+    return _hash
+
+
+def verify_password(_hash: str, password: str):
+    ph = PasswordHasher()
+    try:
+        ph.verify(_hash, password)
+    except VerificationError:
+        return False
+    except Exception as e:
+        print(e)
+        return False
+    return True
