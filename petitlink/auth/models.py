@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import AsyncIterable
 
-from fastapi import Depends
 from sqlalchemy import create_engine, Column, String, Integer, DateTime
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 

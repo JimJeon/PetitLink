@@ -5,9 +5,9 @@ from fastapi.responses import RedirectResponse
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from sqlalchemy.orm import Session
 
-from petitlink.auth import router, templates, settings
-from petitlink.auth.models import UserTable, get_db
-from petitlink.auth.core import (
+from app import app, templates, settings
+from models import UserTable, get_db
+from core import (
     build_email_message, send_login_email, generate_access_token, register
 )
 
@@ -30,12 +30,12 @@ class LoginForm:
         return False
 
 
-@router.get('/login')
+@app.get('/login')
 async def login_get_view(request: Request):
     return templates.TemplateResponse("auth/login.html", {"request": request})
 
 
-@router.post('/login')
+@app.post('/login')
 async def login_post_view(request: Request):
     form = LoginForm(request)
     await form.load_data()
@@ -52,7 +52,7 @@ async def login_post_view(request: Request):
     return templates.TemplateResponse('auth/login.html', form.__dict__)
 
 
-@router.get('/verify/{token}')
+@app.get('/verify/{token}')
 async def verify(token: str, expiration: int = 600, db: Session = Depends(get_db)):
     serializer = URLSafeTimedSerializer(settings.auth_secret_key)
 
@@ -73,7 +73,7 @@ async def verify(token: str, expiration: int = 600, db: Session = Depends(get_db
     return response
 
 
-@router.get('/logout')
+@app.get('/logout')
 def logout(request: Request) -> None:
     msg = 'Logout Successful'
     response = templates.TemplateResponse('auth/login.html', {'request': request, 'msg': msg})
@@ -99,7 +99,7 @@ class RegisterForm:
         return False
 
 
-@router.get('/register/{token}')
+@app.get('/register/{token}')
 async def register_get_view(request: Request, token: str, expiration: int = 1200):
     serializer = URLSafeTimedSerializer(settings.auth_secret_key)
     try:
@@ -110,7 +110,7 @@ async def register_get_view(request: Request, token: str, expiration: int = 1200
     return templates.TemplateResponse('auth/register.html', {'request': request})
 
 
-@router.post('/register/{token}')
+@app.post('/register/{token}')
 async def register_post_view(request: Request, token: str, expiration: int = 1200, db: Session = Depends(get_db)):
     serializer = URLSafeTimedSerializer(settings.auth_secret_key)
     try:

@@ -11,8 +11,8 @@ from fastapi import HTTPException, Depends
 from itsdangerous import URLSafeTimedSerializer
 from sqlalchemy.orm import Session
 
-from petitlink.auth import settings
-from petitlink.auth.models import UserTable
+from app import settings
+from models import UserTable
 
 
 def build_email_message(to: str) -> MIMEMultipart:

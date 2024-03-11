@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  auth:
+    build:
+      context: ./petitlink/auth
+      dockerfile: Dockerfile
+    env_file:
+      - ./petitlink/auth/.env
+    ports:
+      - "8001:8001"

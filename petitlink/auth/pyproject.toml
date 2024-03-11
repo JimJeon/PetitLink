@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "petitlink-auth"
+version = "0.1.0"
+description = "Authentication API for PetitLink"
+authors = ["Jim Jeon <jimjeon.dev@gmail.com>"]
+readme = "README.md"
+packages = [{include = "petitlink"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = {extras = ["all"], version = "^0.110.0"}
+sqlalchemy = "^2.0.28"
+pydantic-settings = "^2.2.1"
+argon2-cffi = "^23.1.0"
+itsdangerous = "^2.1.2"
+pyjwt = "^2.8.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
