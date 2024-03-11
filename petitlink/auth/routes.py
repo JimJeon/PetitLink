@@ -1,16 +1,15 @@
-import jwt
-import smtplib
-
-from datetime import datetime, timedelta
 from typing import List
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
-from fastapi import Request, HTTPException
+from fastapi import Request, HTTPException, Depends
 from fastapi.responses import RedirectResponse
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
+from sqlalchemy.orm import Session
 
 from petitlink.auth import router, templates, settings
+from petitlink.auth.models import UserTable, get_db
+from petitlink.auth.core import (
+    build_email_message, send_login_email, generate_access_token, register
+)
 
 
 class LoginForm:
@@ -32,12 +31,12 @@ class LoginForm:
 
 
 @router.get('/login')
-def login(request: Request):
+async def login_get_view(request: Request):
     return templates.TemplateResponse("auth/login.html", {"request": request})
 
 
 @router.post('/login')
-async def login(request: Request):
+async def login_post_view(request: Request):
     form = LoginForm(request)
     await form.load_data()
     if await form.is_valid():
@@ -53,75 +52,25 @@ async def login(request: Request):
     return templates.TemplateResponse('auth/login.html', form.__dict__)
 
 
-def build_email_message(to: str) -> MIMEMultipart:
-    msg = MIMEMultipart()
-
-    # Add a message header
-    msg['Subject'] = 'PetitLink Login'
-    msg['From'] = settings.auth_email
-    msg['To'] = to
-
-    # Create a link with serialized email
-    serializer = URLSafeTimedSerializer(settings.auth_secret_key)
-    link = serializer.dumps(to, salt=settings.auth_salt)
-    link = 'http://local.petitlink.com:8000/verify/' + link
-
-    # Add a message body
-    msg.attach(MIMEText(f'''
-        <a href="{link}">Login</a>
-        ''', 'html'))
-
-    return msg
-
-
-async def send_login_email(to: str, msg: MIMEMultipart) -> None:
-    with smtplib.SMTP('smtp.gmail.com', 587) as server:
-        server.starttls()  # TLS support for security
-        server.login(settings.auth_email, settings.auth_email_password)
-        server.sendmail(settings.auth_email, to, msg.as_string())
-        print('email sent successfully')
-
-
 @router.get('/verify/{token}')
-async def verify(token: str, expiration: int = 600):
+async def verify(token: str, expiration: int = 600, db: Session = Depends(get_db)):
     serializer = URLSafeTimedSerializer(settings.auth_secret_key)
+
     try:
         email = serializer.loads(token, salt=settings.auth_salt, max_age=expiration)
-        token = generate_access_token(email)
-        response = RedirectResponse('/index')
-        response.set_cookie(
-            key='token', value=token, httponly=True, samesite='strict', domain='petitlink.com')
-        return response
     except BadSignature or SignatureExpired:
         return False
 
+    user = UserTable.find_user_by_email(db, email)
 
-def generate_access_token(email: str):
-    payload = {
-        'email': email,
-        'exp': datetime.now() + timedelta(hours=24)
-    }
+    if not user:
+        return RedirectResponse(f'/register/{token}')
 
-    token = jwt.encode(
-        payload,
-        settings.auth_access_token_secret_key,
-        algorithm='HS256'
-    )
-
-    return token
-
-
-def decode_access_token(token: str) -> str:
-    try:
-        payload = jwt.decode(token, settings.auth_access_token_secret_key, algorithms='HS256')
-    except jwt.exceptions.InvalidSignatureError:
-        raise HTTPException(status_code=401, detail='Invalid token')
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail='Token expired')
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f'Error: {e}')
-
-    return payload['email']
+    token = generate_access_token(email)
+    response = RedirectResponse('/index')
+    response.set_cookie(
+        key='token', value=token, httponly=True, samesite='strict', domain='petitlink.com')
+    return response
 
 
 @router.get('/logout')
@@ -130,3 +79,48 @@ def logout(request: Request) -> None:
     response = templates.TemplateResponse('auth/login.html', {'request': request, 'msg': msg})
     response.delete_cookie(key='token', domain='petitlink.com')
     return response
+
+
+class RegisterForm:
+    def __init__(self, request: Request):
+        self.request: Request = request
+        self.errors: List = []
+        self.password: str | None = None
+
+    async def load_data(self):
+        form = await self.request.form()
+        self.password = form.get('password')
+
+    async def is_valid(self):
+        if len(self.password) <= 8:
+            self.errors.append('Password must be longer than 8 characters')
+        if not self.errors:
+            return True
+        return False
+
+
+@router.get('/register/{token}')
+async def register_get_view(request: Request, token: str, expiration: int = 1200):
+    serializer = URLSafeTimedSerializer(settings.auth_secret_key)
+    try:
+        email = serializer.loads(token, salt=settings.auth_salt, max_age=expiration)
+    except BadSignature or SignatureExpired:
+        return False
+
+    return templates.TemplateResponse('auth/register.html', {'request': request})
+
+
+@router.post('/register/{token}')
+async def register_post_view(request: Request, token: str, expiration: int = 1200, db: Session = Depends(get_db)):
+    serializer = URLSafeTimedSerializer(settings.auth_secret_key)
+    try:
+        email = serializer.loads(token, salt=settings.auth_salt, max_age=expiration)
+    except BadSignature or SignatureExpired:
+        return False
+
+    form = RegisterForm(request)
+    await form.load_data()
+    if await form.is_valid():
+        register(db, email, form.password)
+        return True
+    return templates.TemplateResponse('auth/register.html', form.__dict__)

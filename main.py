@@ -3,7 +3,7 @@ from fastapi.exceptions import HTTPException
 from fastapi.templating import Jinja2Templates
 
 from petitlink import create_app
-from petitlink.auth.routes import decode_access_token
+from petitlink.auth.core import decode_access_token
 
 
 templates = Jinja2Templates('templates')
