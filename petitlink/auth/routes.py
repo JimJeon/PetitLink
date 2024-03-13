@@ -19,7 +19,7 @@ async def login_post_handler(request: Request, db: Session = Depends(get_db)):
 
     user = UserTable.find_user_by_email(db, email)
 
-    if user.verify_password(password):
+    if user and user.verify_password(password):
         token = generate_access_token(email)
         return JSONResponse(status_code=status.HTTP_200_OK, content={'token': token})  # Access Granted
     return JSONResponse(
