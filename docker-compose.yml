@@ -19,3 +19,12 @@ services:
       - ./petitlink/auth/.env
     expose:
       - "8001"
+
+  petitlink:
+    build:
+      context: ./petitlink/petitlink
+      dockerfile: Dockerfile
+    env_file:
+      - ./petitlink/petitlink/.env
+    expose:
+      - "8000"
