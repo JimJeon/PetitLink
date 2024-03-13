@@ -2,8 +2,8 @@ from fastapi import Request, Depends, status, APIRouter
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-from models import UserTable, get_db
-from core import (
+from .models import UserTable, get_db
+from .core import (
     generate_access_token, register
 )
 

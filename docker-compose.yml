@@ -20,11 +20,11 @@ services:
     expose:
       - "8001"
 
-  petitlink:
+  web:
     build:
-      context: ./petitlink/petitlink
+      context: petitlink/web
       dockerfile: Dockerfile
     env_file:
-      - ./petitlink/petitlink/.env
+      - petitlink/web/.env
     expose:
       - "8000"

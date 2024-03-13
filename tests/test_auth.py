@@ -7,8 +7,9 @@ from pytest import FixtureRequest
 from pydantic_core import PydanticUndefinedType
 from pydantic_settings import BaseSettings
 
-from petitlink.auth import Settings, settings
-from petitlink.auth.core import send_login_email, build_email_message
+from petitlink.auth import Settings
+from auth.main import settings
+from auth.main.core import send_login_email, build_email_message
 
 
 # Patching pydantic settings for pytest
