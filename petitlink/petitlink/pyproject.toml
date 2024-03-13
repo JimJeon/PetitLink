@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "petitlink"
+version = "0.1.0"
+description = "Displaying page for petitlink"
+authors = ["Jim Jeon <jimjeon.dev@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = {extras = ["all"], version = "^0.110.0"}
+itsdangerous = "^2.1.2"
+pydantic-settings = "^2.2.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
