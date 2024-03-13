@@ -10,7 +10,7 @@ from argon2.exceptions import HashingError
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app import settings
+from settings import settings
 from models import UserTable
 
 

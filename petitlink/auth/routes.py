@@ -1,17 +1,17 @@
-from typing import List
-
-from fastapi import Request, Depends, status
+from fastapi import Request, Depends, status, APIRouter
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-from app import app, templates
 from models import UserTable, get_db
 from core import (
     generate_access_token, register
 )
 
 
-@app.post('/login')
+router = APIRouter()
+
+
+@router.post('/login')
 async def login_post_handler(request: Request, db: Session = Depends(get_db)):
     user_data = await request.json()
     email = user_data['email']
@@ -26,7 +26,7 @@ async def login_post_handler(request: Request, db: Session = Depends(get_db)):
         status_code=status.HTTP_401_UNAUTHORIZED, content={'message': 'Wrong password'})  # Access Denied
 
 
-@app.post('/register')
+@router.post('/register')
 async def register_post_handler(request: Request, db: Session = Depends(get_db)):
     user_data = await request.json()
     email = user_data['email']
@@ -34,9 +34,8 @@ async def register_post_handler(request: Request, db: Session = Depends(get_db))
     register(db, email, password)
 
 
-@app.get('/logout')
-def logout(request: Request) -> None:
-    msg = 'Logout Successful'
-    response = templates.TemplateResponse('auth/login.html', {'request': request, 'msg': msg})
+@router.get('/logout')
+def logout():
+    response = JSONResponse({'message': 'logout successful'})
     response.delete_cookie(key='token', domain='petitlink.com')
     return response
