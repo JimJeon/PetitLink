@@ -38,7 +38,7 @@ async def login_post_view(request: Request):
 
 
 @router.get('/register/{token}')
-async def register_get_handler(request: Request, token: str, expiration: int = 1200):
+async def register_get_view(request: Request, token: str, expiration: int = 1200):
     serializer = URLSafeTimedSerializer(settings.email_secret_key)
     try:
         email = serializer.loads(token, salt=settings.email_salt, max_age=expiration)
@@ -48,7 +48,7 @@ async def register_get_handler(request: Request, token: str, expiration: int = 1
 
 
 @router.post('/register/{token}')
-async def register_post_handler(request: Request, token: str, expiration: int = 1200):
+async def register_post_view(request: Request, token: str, expiration: int = 1200):
     serializer = URLSafeTimedSerializer(settings.email_secret_key)
     try:
         email = serializer.loads(token, salt=settings.email_salt, max_age=expiration)
