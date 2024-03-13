@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import AsyncIterable
 
-from fastapi import Depends
+from argon2 import PasswordHasher
+from argon2.exceptions import VerificationError
 from sqlalchemy import create_engine, Column, String, Integer, DateTime
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 
@@ -39,6 +40,18 @@ class UserTable(Base):
     @classmethod
     def find_user_by_email(cls, db: Session, email: str):
         return db.query(UserTable).filter_by(email=email).first()
+
+    def verify_password(self, password: str):
+        ph = PasswordHasher()
+
+        try:
+            ph.verify(self.password_hash, password)
+        except VerificationError:
+            return False
+        except Exception as e:
+            print(e)
+            return False
+        return True
 
 
 init_db()
