@@ -24,7 +24,7 @@ async def login_post_view(request: Request):
     await form.load_data()
     if await form.is_valid():
         async with httpx.AsyncClient() as client:
-            response = await client.post('http://auth.petitlink.com/login', json={'email': form.email, 'password': form.password})
+            response = await client.post('http://auth:8001/login', json={'email': form.email, 'password': form.password})
 
         # Access Granted
         if response.status_code == 200:
