@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 
 from itsdangerous import URLSafeTimedSerializer
 
-from app import settings
+from .settings import settings
 
 
 def build_email_message(to: str) -> MIMEMultipart:

@@ -5,8 +5,8 @@ from fastapi.responses import RedirectResponse
 
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
-from settings import settings
-from forms import LoginForm, RegisterForm
+from .settings import settings
+from .forms import LoginForm, RegisterForm
 
 
 templates = Jinja2Templates('templates')

@@ -10,8 +10,8 @@ from argon2.exceptions import HashingError
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from settings import settings
-from models import UserTable
+from .settings import settings
+from .models import UserTable
 
 
 def generate_access_token(email: str):

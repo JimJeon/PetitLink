@@ -7,7 +7,7 @@ services:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-    container_name: web-proxy
+    container_name: petitlink-proxy
     depends_on:
       - auth
 
