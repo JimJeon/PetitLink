@@ -6,7 +6,7 @@ from fastapi.responses import RedirectResponse
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 from .settings import settings
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm, CreateNewPetitLinkForm
 
 
 templates = Jinja2Templates('templates')
@@ -38,7 +38,7 @@ async def login_post_view(request: Request):
 
 
 @router.get('/register/{token}')
-async def register_get_handler(request: Request, token: str, expiration: int = 1200):
+async def register_get_view(request: Request, token: str, expiration: int = 1200):
     serializer = URLSafeTimedSerializer(settings.email_secret_key)
     try:
         email = serializer.loads(token, salt=settings.email_salt, max_age=expiration)
@@ -48,7 +48,7 @@ async def register_get_handler(request: Request, token: str, expiration: int = 1
 
 
 @router.post('/register/{token}')
-async def register_post_handler(request: Request, token: str, expiration: int = 1200):
+async def register_post_view(request: Request, token: str, expiration: int = 1200):
     serializer = URLSafeTimedSerializer(settings.email_secret_key)
     try:
         email = serializer.loads(token, salt=settings.email_salt, max_age=expiration)
@@ -62,3 +62,26 @@ async def register_post_handler(request: Request, token: str, expiration: int = 
         # Send request to api
         return True
     return templates.TemplateResponse('register.html', form.__dict__)
+
+
+@router.get('/new')
+async def create_new_petitlink_get_view(request: Request):
+    return templates.TemplateResponse('new.html', {'request': Request})
+
+
+@router.post('/new')
+async def create_new_petitlink_post_view(request: Request):
+    form = CreateNewPetitLinkForm(request)
+    await form.load_data()
+
+    if await form.is_valid():
+        # Generate PetitLink
+        async with httpx.AsyncClient() as client:
+            response = await client.post('http://api:8002/new', json={'link': form.link})
+        if response.status_code == 200:
+            token = response.json().get('token')
+            return RedirectResponse('http://petitlink.com/index/').set_cookie(
+                key='token', value=token, httponly=True, secure=True)
+        else:
+            return templates.TemplateResponse('new.html', form.__dict__)
+    return templates.TemplateResponse('new.html', form.__dict__)

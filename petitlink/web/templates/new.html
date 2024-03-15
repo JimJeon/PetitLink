@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}
+    <title>New</title>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <h5 class="display-5">New PetitLink</h5>
+            <div class="text-danger font-weight-bold">
+                {% for err in errors %}
+                    <li>{{ err }}</li>
+                {% endfor %}
+            </div>
+
+            <div class="text-success font-weight-bold">
+                {% if msg %}
+                    <div class="badge bg-success text-wrap font-weight-bold" style="font-size: large;">
+                        {{ msg }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row my-5">
+            <form method="POST">
+                <div class="mb-3">
+                    <label>Link</label>
+                    <input type="text" required placeholder="Link" name="link" value="{{ link }}" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

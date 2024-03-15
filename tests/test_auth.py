@@ -7,9 +7,8 @@ from pytest import FixtureRequest
 from pydantic_core import PydanticUndefinedType
 from pydantic_settings import BaseSettings
 
-from petitlink.auth import Settings
-from auth.main import settings
-from auth.main.core import send_login_email, build_email_message
+from petitlink.web.app.settings import Settings, settings
+from petitlink.web.app.core import send_login_email, build_email_message
 
 
 # Patching pydantic settings for pytest
@@ -52,7 +51,11 @@ class TestBuildEmailMessage:
     @pytest.mark.parametrize(
         'patch_settings',
         [
-            {'auth_email': 'from@test.com', 'auth_secret_key': 'auth-secret-key', 'auth_salt': 'auth-salt'},
+            {
+                'petitlink_email': 'from@test.com',
+                'petitlink_email_secret_key': 'petitlink-email-secret-key',
+                'petitlink_email_salt': 'petitlink-email-salt'
+            },
         ],
         indirect=True
     )
@@ -71,14 +74,16 @@ class TestSendLoginEmail:
     @pytest.mark.parametrize(
         'patch_settings',
         [
-            {'auth_email': 'from@test.com', 'auth_email_password': 'auth-email-password'},
+            {
+                'petitlink_email': 'from@test.com',
+                'petitlink_email_pass': 'petitlink-email-pass'},
         ],
         indirect=True
     )
     async def test_send_login_email(self, mocker, patch_settings: Settings):
         # Arrange
-        mock_smtp = mocker.MagicMock(name='petitlink.auth.core.smtplib.SMTP')
-        mocker.patch('petitlink.auth.core.smtplib.SMTP', new=mock_smtp)
+        mock_smtp = mocker.MagicMock(name='petitlink.web.app.core.smtplib.SMTP')
+        mocker.patch('petitlink.web.app.core.smtplib.SMTP', new=mock_smtp)
         msg = MIMEMultipart()
 
         # Act
@@ -90,5 +95,5 @@ class TestSendLoginEmail:
         mock_smtp.return_value.__enter__.return_value.sendmail.assert_called_once()
 
         mock_smtp.assert_called_with('smtp.gmail.com', 587)
-        mock_smtp.return_value.__enter__.return_value.login.assert_called_with('from@test.com', 'auth-email-password')
+        mock_smtp.return_value.__enter__.return_value.login.assert_called_with('from@test.com', 'petitlink-email-pass')
         mock_smtp.return_value.__enter__.return_value.sendmail.assert_called_with('from@test.com', 'to@test.com', msg.as_string())

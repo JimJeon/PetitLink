@@ -1,9 +1,20 @@
+from abc import ABC, abstractmethod
 from typing import List
 
 from fastapi import Request
 
 
-class LoginForm:
+class Form(ABC):
+    @abstractmethod
+    async def load_data(self):
+        pass
+
+    @abstractmethod
+    async def is_valid(self):
+        pass
+
+
+class LoginForm(Form):
     def __init__(self, request: Request):
         self.request: Request = request
         self.errors: List = []
@@ -23,7 +34,7 @@ class LoginForm:
         return False
 
 
-class RegisterForm:
+class RegisterForm(Form):
     def __init__(self, request: Request):
         self.request: Request = request
         self.errors: List = []
@@ -40,3 +51,16 @@ class RegisterForm:
             return True
         return False
 
+
+class CreateNewPetitLinkForm(Form):
+    def __init__(self, request: Request):
+        self.request: Request = request
+        self.errors: List = []
+        self.link: str | None = None
+
+    async def load_data(self):
+        form = await self.request.form()
+        self.link = form.get('link')
+
+    async def is_valid(self):
+        pass

@@ -10,6 +10,8 @@ services:
     container_name: petitlink-proxy
     depends_on:
       - auth
+      - web
+      - api
 
   auth:
     build:
@@ -19,6 +21,8 @@ services:
       - ./petitlink/auth/.env
     expose:
       - "8001"
+    volumes:
+      - ./petitlink/auth/:/auth/
 
   web:
     build:
@@ -28,3 +32,24 @@ services:
       - petitlink/web/.env
     expose:
       - "8000"
+    volumes:
+      - ./petitlink/web/:/web/
+
+  api:
+    build:
+      context: ./petitlink/api
+      dockerfile: Dockerfile
+    env_file:
+      - ./petitlink/api/.env
+    expose:
+      - "8002"
+    volumes:
+      -  ./petitlink/api/:/api/
+    depends_on:
+      - redis
+
+  redis:
+    image: redis
+    expose:
+      - "6379"
+    restart: always
