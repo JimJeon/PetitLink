@@ -1,24 +1,13 @@
-from random import choice
-from string import ascii_letters
-
-from fastapi import Depends, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi import Depends, HTTPException, Request, status, APIRouter
+from fastapi.responses import RedirectResponse, JSONResponse
 from pydantic import BaseModel
-from redis.exceptions import WatchError
 from sqlalchemy.orm import Session
 
-from petitlink.api import router
-from petitlink.api.models import SessionLocal, PetitLink
-from petitlink.db import redis_client
+from .core import create_and_save
+from .models import PetitLink, redis_client, get_db
 
 
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+router = APIRouter()
 
 
 class CreateLinkDto(BaseModel):
@@ -61,39 +50,8 @@ async def delete(link_id: int, db: Session = Depends(get_db)):
     db.commit()
 
 
-def generate_random_string(length: int):
-    """Generate a random string using [a-zA-Z0-9] with given length l."""
-    return ''.join([choice(ascii_letters) for _ in range(length)])
-
-
 class GeneratePetitLinkDto(BaseModel):
     original_link: str
-
-
-@router.post('/generate')
-async def generate_petit_link(dto: GeneratePetitLinkDto):
-    path = generate_random_string(5)
-
-    # TODO: Add a retry logic when key already exists
-    success = False
-    with redis_client.pipeline(transaction=True) as p:
-        while True:
-            try:
-                # Check if path is not occupied.
-                p.watch(path)
-                # Put data into pipeline.
-                p.multi()
-                p.setnx(path, dto.original_link)
-                # Execute the pipeline and record the success.
-                success = p.execute()[0]
-                break
-            except WatchError:
-                continue
-
-    if success:
-        return path
-    else:
-        raise HTTPException(status_code=500, detail='Something went wrong')
 
 
 @router.get('/r/{path}')
@@ -104,3 +62,16 @@ async def redirect(path: str):
     else:
         return RedirectResponse(link)
 
+
+@router.post('/create')
+async def create_petitlink(request: Request, db: Session = Depends(get_db)):
+    json_data = await request.json()
+
+    link = json_data.get('link')
+
+    if not link:
+        return JSONResponse({'message': 'Bad Request'}, status_code=status.HTTP_400_BAD_REQUEST)
+
+    path = create_and_save(link, db)
+
+    return path
