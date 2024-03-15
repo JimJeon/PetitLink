@@ -1,3 +1,4 @@
+certbot/
 .idea/
 __pycache__/
 app.db
