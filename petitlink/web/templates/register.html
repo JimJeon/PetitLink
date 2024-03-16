@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}
+    <title>Register</title>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <h5 class="display-5">Register</h5>
+            <div class="text-danger font-weight-bold">
+                {% for err in errors %}
+                    <li>{{ err }}</li>
+                {% endfor %}
+            </div>
+
+            <div class="text-success font-weight-bold">
+                {% if msg %}
+                    <div class="badge bg-success text-wrap font-weight-bold" style="font-size: large;">
+                        {{ msg }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row my-5">
+            <form method="POST">
+                <div class="mb-3">
+                    <label>Password</label>
+                    <input type="password" required placeholder="Password" name="password" value="{{ password }}" id="password" onkeyup="check();" class="form-control">
+                    <label>Confirm</label>
+                    <input type="password" required placeholder="Password Confirm" name="confirm" value="{{ confirm }}" id="confirm" onkeyup="check();" class="form-control">
+                    <span id="message"></span>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        let check = function () {
+            if (document.getElementById('password').value ===
+                document.getElementById('confirm').value) {
+                document.getElementById('message').style.color = 'green';
+                document.getElementById('message').innerHTML = 'matching';
+            } else {
+                document.getElementById('message').style.color = 'red';
+                document.getElementById('message').innerHTML = 'mismatching';
+            }
+        }
+    </script>
+{% endblock %}
